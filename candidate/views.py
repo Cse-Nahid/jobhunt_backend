@@ -3,7 +3,8 @@ from rest_framework import viewsets
 from . import models
 from . import serializers
 # auth er jonno
-
+from rest_framework.exceptions import NotFound
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.contrib.auth.tokens import default_token_generator
@@ -12,6 +13,7 @@ from django.utils.encoding import force_bytes
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from rest_framework.authtoken.models import Token
+from rest_framework.exceptions import NotAuthenticated
 # for sending email
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
@@ -82,9 +84,25 @@ class UserLoginApiView(APIView):
                 return Response({'error' : "Invalid Credential"})
         return Response(serializer.errors)
 
-class UserLogoutView(APIView):
-    def get(self, request):
-        request.user.auth_token.delete()
-        logout(request)
-        return redirect('login')
+# class UserLogoutView(APIView):
+#     def get(self, request):
+#         request.user.auth_token.delete()
+#         logout(request)
+#         return redirect('login')
         
+
+
+class UserLogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        # Check if the user is authenticated
+        if not request.user.is_authenticated:
+            raise NotAuthenticated("User is not authenticated.")
+        
+        # Check if the user has an auth_token
+        if hasattr(request.user, 'auth_token'):
+            request.user.auth_token.delete()  # Remove the auth token
+
+        logout(request)  # Log out the user
+        return redirect('login')  # Redirect to the login page
