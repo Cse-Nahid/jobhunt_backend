@@ -1,17 +1,22 @@
-from rest_framework.routers import DefaultRouter
 from django.urls import path, include
-from . import views
-router = DefaultRouter() # amader router
-
-# router.register('list', views.DoctorViewset) # router er antena
-# router.register('specialization', views.SpecializationViewset) # router er antena
-# router.register('available_time', views.AvailableTimeViewset) # router er antena
-# router.register('designation', views.DesignationViewset) # router er antena
-# router.register('reviews', views.ReviewViewset) # router er antena
-
-router.register('list', views.EmployerViewset) # router er antena
+from rest_framework.routers import DefaultRouter
+from .views import EmployerViewSet, EmployerRegistrationAPIView, activate, EmployerDataByUserIDView
+# from employer.permissions import IsEmployerOrReadOnly, IsEmployerUser
 
 
+# Create a router
+router = DefaultRouter()
+
+# register ViewSets with the router.
+router.register('list', EmployerViewSet)
+
+
+# The API URLs are now determined automatically by the router.
 urlpatterns = [
     path('', include(router.urls)),
+
+    path('register/', EmployerRegistrationAPIView.as_view(), name='employer_register'),
+    path('active/<user_id>/<token>/', activate, name='employer_account_activate'),
+
+    path('by_user_id/', EmployerDataByUserIDView.as_view(), name='employer_by_user_id'),
 ]

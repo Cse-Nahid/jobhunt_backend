@@ -1,16 +1,18 @@
 from django.contrib import admin
+from .models import Employer
 
 # Register your models here.
-from . import models
-
-admin.site.register(models.AvailableTime)
-
-# class SpecializationAdmin(admin.ModelAdmin):
-#     prepopulated_fields = {'slug': ('name',), }
-# class DesignationAdmin(admin.ModelAdmin):
-#     prepopulated_fields = {'slug': ('name',), }
+class EmployerAdmin(admin.ModelAdmin):
+    def employer(self, obj):
+        return obj.user.username
     
-# admin.site.register(models.Specialization, SpecializationAdmin)
-# admin.site.register(models.Designation, DesignationAdmin)
-admin.site.register(models.Employer)
-# admin.site.register(models.Review)
+    def email(self, obj):
+        return obj.user.email
+    
+    def user_type(self, obj):
+        return obj.user.user_type
+    
+    list_display = ['id', 'employer', 'company_name', 'business_info', 'company_address', 'email', 'user_type']
+
+
+admin.site.register(Employer, EmployerAdmin)
